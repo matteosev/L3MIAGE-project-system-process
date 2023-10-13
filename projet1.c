@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
 	// Exception : le pipe N-1 relie le node N-1 au node 0
 	for (int i = 0; i < N; i++) {
 		if (pipe(f[i]) == -1) {
-			fprintf(stderr, "Erreur de pipe\n", i);
+			fprintf(stderr, "Erreur de pipe\n");
 			exit(1);
 		}
 	}
@@ -43,14 +43,29 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+	// Le parent transmet l'entier au node n°0 en utilisant le pipe n°N-1 (dernier)
 	if (getpid() == pid_parent) {
-		while(wait(NULL) != -1)
-			;
+        int data = 2456;
+        write(f[N - 1][1], &data, sizeof(int));
+
+		while(wait(NULL) != -1);
 
 		printf("Tous les fils créés et morts\n");
 	}
+	// Le node i
+	//		- attend de recevoir l'entier du node i-1 (exception : 0 attend N-1)
+	//		- transmet l'entier au node i+1 (exception : N-1 transmet à 0)
 	else {
-		printf("Fils pid %d n°%d\n", getpid(), node_num);
+        int data;
+
+        if (node_num == 0)
+            while(read(f[N - 1][0], &data, sizeof(int)) == 0);
+        else
+            while(read(f[node_num - 1][0], &data, sizeof(int)) == 0);
+
+		write(f[node_num][1], &data, sizeof(int));
+		printf("Fils n°%d - entier transmis = %d\n", node_num, data);
+		fflush(stdout);
 	}
 
 	close(f_controller[0]);
