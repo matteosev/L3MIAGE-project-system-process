@@ -45,8 +45,8 @@ int main(int argc, char *argv[]) {
 
 	// Le parent transmet l'entier au node n°0 en utilisant le pipe n°N-1 (dernier)
 	if (getpid() == pid_parent) {
-        int data = 2456;
-        write(f[N - 1][1], &data, sizeof(int));
+		int data = 2456;
+		write(f[N - 1][1], &data, sizeof(int));
 
 		while(wait(NULL) != -1);
 
@@ -56,12 +56,12 @@ int main(int argc, char *argv[]) {
 	//		- attend de recevoir l'entier du node i-1 (exception : 0 attend N-1)
 	//		- transmet l'entier au node i+1 (exception : N-1 transmet à 0)
 	else {
-        int data;
+		int data;
 
-        if (node_num == 0)
-            while(read(f[N - 1][0], &data, sizeof(int)) == 0);
-        else
-            while(read(f[node_num - 1][0], &data, sizeof(int)) == 0);
+		if (node_num == 0)
+			while(read(f[N - 1][0], &data, sizeof(int)) == 0);
+		else
+			while(read(f[node_num - 1][0], &data, sizeof(int)) == 0);
 
 		write(f[node_num][1], &data, sizeof(int));
 		printf("Fils n°%d - entier transmis = %d\n", node_num, data);
