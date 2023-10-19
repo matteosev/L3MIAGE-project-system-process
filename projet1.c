@@ -63,6 +63,7 @@ int main(int argc, char *argv[]) {
 		else
 			while(read(f[node_num - 1][0], &data, sizeof(int)) == 0);
 
+		data++;
 		write(f[node_num][1], &data, sizeof(int));
 		printf("Fils n°%d - entier transmis = %d\n", node_num, data);
 		fflush(stdout);
