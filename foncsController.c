@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include "table.h"
+#include "table/table.h"
 #include "foncscontroller.h"
 
 

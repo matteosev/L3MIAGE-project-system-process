@@ -3,13 +3,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include "table.h"
+#include "table/table.h"
 #include "foncscontroller.h"
 
 typedef struct {
     int code;
     int key;
-    char value[128];
+    char value[129];
 } Data;
 
 int node_num;
@@ -28,13 +28,13 @@ int main(int argc, char **argv) {
     int f[N][2];
 
     if (pipe(f_controller) == -1) {
-        fprintf(stderr, "Erreur de pipe\n");
+        perror("Erreur de pipe\n");
         exit(1);
     }
 
     for (int i = 0; i < N; i++) {
         if (pipe(f[i]) == -1) {
-            fprintf(stderr, "Erreur de pipe\n");
+            perror("Erreur de pipe\n");
             exit(1);
         }
     }
@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
     for (int i = 0; i < N; i++) {
         switch (fork()) {
             case -1:
-                fprintf(stderr, "Erreur de fork\n");
+                perror("Erreur de fork\n");
                 exit(1);
             case 0:
                 close(f_controller[0]);
@@ -54,51 +54,59 @@ int main(int argc, char **argv) {
     }
 
     PTable_entry table = NULL;
-    Data data;
+    Data data = {0, 0, ""};
 
     // Check if the current process is the parent only once
     if (getpid() == pid_parent) {
-        
+		while(1) {
+			printf("ok\n");
+            printf("%ld\n", read(f_controller[0], &data, sizeof(Data)));
+				printf("Réponse reçue\n");
+
             data.code = get_command();
-            if (data.code == 1) {
-                data.key = get_key();
-                int std = get_string_stdin(data.value, 128);
-            }
 
-            if (data.code == 0){
-                printf("bye bye!\n");
-                exit(0);
-            }
-
+			switch(data.code) {
+				case 0:
+					break;
+				case 1:
+                	data.key = get_key();
+                	get_string_stdin(data.value, 128);
+					break;
+				case 2:
+                	data.key = get_key();
+					break;
+				case 3:
+					break;
+				default:
+					continue;
+			}
             write(f[N - 1][1], &data, sizeof(Data));
-        
-
-        while (wait(NULL) != -1);
-
-
-
+		}
+		//while (wait(NULL) != -1);
     } else {
-       // while (1) {
-            if (node_num == 0) {
-                while (read(f[N - 1][0], &data, sizeof(Data)) == 0);
-            } else {
-                while (read(f[node_num - 1][0], &data, sizeof(Data)) == 0);
-            }
+		while (1) {
+            if (node_num == 0)
+               	read(f[N - 1][0], &data, sizeof(Data));
+            else
+               	read(f[node_num - 1][0], &data, sizeof(Data));
 
-            int processToStore = data.key % N;
-            if (node_num == processToStore) {
-                store(&table, data.key, data.value);
-                printf("Données stockées dans le processus %d : clé=%d, valeur=%s\n", processToStore, data.key, data.value);
-                fflush(stdout);
-            }
-
+			switch(data.code) {
+				case 0:
+					break;
+				case 1:
+            		if (node_num == data.key % N)
+                		store(&table, data.key, data.value);
+                		//printf("Données stockées dans le processus %d : clé=%d, valeur=%s\n", processToStore, data.key, data.value);
+					break;
+				case 2:
+            		if (node_num == data.key % N)
+                		lookup(table, data.key);
+					write(f_controller[1], &data, sizeof(Data));
+					break;
+				case 3:
+			}
             write(f[node_num][1], &data, sizeof(Data));
-            display(table);
-
-            if (data.code == 0) {
-                exit(1);
-            }
-        //}
+        }
     }
 
     close(f_controller[0]);
