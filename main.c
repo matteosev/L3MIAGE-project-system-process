@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
                 	data.key = get_key();
             		write(f[N - 1][1], &data, sizeof(Data));
 					read(f_controller[0], &data, sizeof(Data));
-					printf("Valeur trouvée = %s \n", data.value);
+					printf("La valeur recherchée : %s \n", data.value);
 					break;
 				case 3:
 					write(f[N-1][1], &data, sizeof(Data));
@@ -85,6 +85,7 @@ int main(int argc, char **argv) {
 						read(f_controller[0], &data, sizeof(Data));
 					}
 				default:
+                    break;
 			}
 		}
     } else {
@@ -106,15 +107,19 @@ int main(int argc, char **argv) {
 				case 2:
             		if (node_num == data.key % N) {
 						char *value = lookup(table, data.key);
-                        strcpy(data.value, value == NULL ? "" : value);
+                        strcpy(data.value, value == NULL ? "n'est pas trouvée" : value);
 						write(f_controller[1], &data, sizeof(Data));
 					} else
             			write(f[node_num][1], &data, sizeof(Data));
 					break;
 				case 3:
+                if (table !=NULL){
+                    printf("process : %d \n",getpid());
+                }
 					display(table);
 					write(f_controller[1], &data, sizeof(Data));
 				default :
+                    break ;
 			}
         }
     }
