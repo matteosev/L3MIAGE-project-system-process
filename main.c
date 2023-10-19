@@ -53,16 +53,19 @@ int main(int argc, char **argv) {
         }
     }
 
-    Data data = {0, 0, "\0"};
-
     // Check if the current process is the parent only once
     if (getpid() == pid_parent) {
 		while(1) {
+    		Data data = {0, 0, ""};
             data.code = get_command();
 
 			switch(data.code) {
 				case 0:
-					break;
+					for (int i = 0; i < N; i++)
+						write(f[i][1], &data, sizeof(Data));
+					while (wait(NULL) != -1);
+					printf("bye bye!\n");
+					exit(0);
 				case 1:
                 	data.key = get_key();
                 	get_string_stdin(data.value, 128);
@@ -75,24 +78,25 @@ int main(int argc, char **argv) {
 					printf("Valeur trouvée = %s \n", data.value);
 					break;
 				case 3:
-                    write(f[N - 1][1], &data, sizeof(Data));
-					break;
+					write(f[N-1][1], &data, sizeof(Data));
+					read(f_controller[0], &data, sizeof(Data));
+					for (int i = 0; i < N - 1; i++) {
+						write(f[i][1], &data, sizeof(Data));
+						read(f_controller[0], &data, sizeof(Data));
+					}
 				default:
-					continue;
 			}
 		}
-		//while (wait(NULL) != -1);
     } else {
     	PTable_entry table = NULL;
 		while (1) {
-            if (node_num == 0)
-               	read(f[N - 1][0], &data, sizeof(Data));
-            else
-               	read(f[node_num - 1][0], &data, sizeof(Data));
+    		Data data = {0, 0, ""};
+
+            read(f[(node_num == 0 ? N : node_num) - 1][0], &data, sizeof(Data));
 
 			switch(data.code) {
 				case 0:
-					break;
+					exit(0);
 				case 1:
             		if (node_num == data.key % N)
                 		store(&table, data.key, data.value);
@@ -101,20 +105,16 @@ int main(int argc, char **argv) {
 					break;
 				case 2:
             		if (node_num == data.key % N) {
-                        if(lookup(table, data.key)==NULL)
-                        {
-                            strcpy(data.value, "n'existe pas ");
-                        }
-                        else{
-                		    strcpy(data.value, lookup(table, data.key));
-                        }
+						char *value = lookup(table, data.key);
+                        strcpy(data.value, value == NULL ? "" : value);
 						write(f_controller[1], &data, sizeof(Data));
-					}
-					else
+					} else
             			write(f[node_num][1], &data, sizeof(Data));
 					break;
+				case 3:
+					display(table);
+					write(f_controller[1], &data, sizeof(Data));
 				default :
-                break;
 			}
         }
     }
