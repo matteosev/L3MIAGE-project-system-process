@@ -53,16 +53,11 @@ int main(int argc, char **argv) {
         }
     }
 
-    PTable_entry table = NULL;
-    Data data = {0, 0, ""};
+    Data data = {0, 0, "\0"};
 
     // Check if the current process is the parent only once
     if (getpid() == pid_parent) {
 		while(1) {
-			printf("ok\n");
-            printf("%ld\n", read(f_controller[0], &data, sizeof(Data)));
-				printf("Réponse reçue\n");
-
             data.code = get_command();
 
 			switch(data.code) {
@@ -71,19 +66,23 @@ int main(int argc, char **argv) {
 				case 1:
                 	data.key = get_key();
                 	get_string_stdin(data.value, 128);
+            		write(f[N - 1][1], &data, sizeof(Data));
 					break;
 				case 2:
                 	data.key = get_key();
+            		write(f[N - 1][1], &data, sizeof(Data));
+					read(f_controller[0], &data, sizeof(Data));
+					printf("Valeur trouvée = %s \n", data.value);
 					break;
 				case 3:
 					break;
 				default:
 					continue;
 			}
-            write(f[N - 1][1], &data, sizeof(Data));
 		}
 		//while (wait(NULL) != -1);
     } else {
+    	PTable_entry table = NULL;
 		while (1) {
             if (node_num == 0)
                	read(f[N - 1][0], &data, sizeof(Data));
@@ -96,16 +95,20 @@ int main(int argc, char **argv) {
 				case 1:
             		if (node_num == data.key % N)
                 		store(&table, data.key, data.value);
-                		//printf("Données stockées dans le processus %d : clé=%d, valeur=%s\n", processToStore, data.key, data.value);
+					else
+            			write(f[node_num][1], &data, sizeof(Data));
 					break;
 				case 2:
-            		if (node_num == data.key % N)
-                		lookup(table, data.key);
-					write(f_controller[1], &data, sizeof(Data));
+            		if (node_num == data.key % N) {
+						printf("%d trouvé\n", node_num);
+                		strcpy(data.value, lookup(table, data.key));
+						write(f_controller[1], &data, sizeof(Data));
+					}
+					else
+            			write(f[node_num][1], &data, sizeof(Data));
 					break;
 				case 3:
 			}
-            write(f[node_num][1], &data, sizeof(Data));
         }
     }
 
