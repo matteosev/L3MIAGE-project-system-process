@@ -1,10 +1,10 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include "table/table.h"
 #include "foncscontroller.h"
+#include <string.h>
 
 typedef struct {
     int code;
@@ -75,6 +75,7 @@ int main(int argc, char **argv) {
 					printf("Valeur trouvée = %s \n", data.value);
 					break;
 				case 3:
+                    write(f[N - 1][1], &data, sizeof(Data));
 					break;
 				default:
 					continue;
@@ -100,14 +101,20 @@ int main(int argc, char **argv) {
 					break;
 				case 2:
             		if (node_num == data.key % N) {
-						printf("%d trouvé\n", node_num);
-                		strcpy(data.value, lookup(table, data.key));
+                        if(lookup(table, data.key)==NULL)
+                        {
+                            strcpy(data.value, "n'existe pas ");
+                        }
+                        else{
+                		    strcpy(data.value, lookup(table, data.key));
+                        }
 						write(f_controller[1], &data, sizeof(Data));
 					}
 					else
             			write(f[node_num][1], &data, sizeof(Data));
 					break;
-				case 3:
+				default :
+                break;
 			}
         }
     }
@@ -122,7 +129,3 @@ int main(int argc, char **argv) {
 
     return 0;
 }
-
-
-
-
