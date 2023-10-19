@@ -58,23 +58,25 @@ int main(int argc, char **argv) {
 
     // Check if the current process is the parent only once
     if (getpid() == pid_parent) {
-        while (1) {
+        
             data.code = get_command();
             if (data.code == 1) {
                 data.key = get_key();
                 int std = get_string_stdin(data.value, 128);
             }
 
-            if (data.code == 0)
-                break;
+            if (data.code == 0){
+                printf("bye bye!\n");
+                exit(0);
+            }
 
             write(f[N - 1][1], &data, sizeof(Data));
-        }
+        
 
         while (wait(NULL) != -1);
 
-        // Gracefully exit the program here
-        printf("bye bye!\n");
+
+
     } else {
        // while (1) {
             if (node_num == 0) {
