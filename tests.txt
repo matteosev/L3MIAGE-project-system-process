@@ -1,0 +1,76 @@
+voici des exemples d'execution : 
+
+exempel 1 general :
+belguitr@im2ag-turing-01:[~/systeme/projet]: ./main 5
+Enter command (0 = exit, 1 = set, 2 = lookup, 3 = dump):
+1
+Enter the key (decimal number):
+1
+Enter the value (string, max 127 chars): one
+Enter command (0 = exit, 1 = set, 2 = lookup, 3 = dump):
+1
+Enter the key (decimal number):
+2
+Enter the value (string, max 127 chars): two
+Enter command (0 = exit, 1 = set, 2 = lookup, 3 = dump):
+2
+Enter the key (decimal number):
+2
+La valeur recherchée : two 
+Enter command (0 = exit, 1 = set, 2 = lookup, 3 = dump):
+1
+Enter the key (decimal number):
+7
+Enter the value (string, max 127 chars): seven
+Enter command (0 = exit, 1 = set, 2 = lookup, 3 = dump):
+3
+process : 821014 
+1 : one
+process : 821015 
+7 : seven
+2 : two
+Enter command (0 = exit, 1 = set, 2 = lookup, 3 = dump):
+3
+process : 821014 
+1 : one
+process : 821015 
+7 : seven
+2 : two
+Enter command (0 = exit, 1 = set, 2 = lookup, 3 = dump):
+0
+bye bye!
+
+exemple 2  valeur pas trouvée : 
+belguitr@im2ag-turing-01:[~/systeme/projet]: ./main 5
+Enter command (0 = exit, 1 = set, 2 = lookup, 3 = dump):
+1
+Enter the key (decimal number):
+1
+Enter the value (string, max 127 chars): ro
+Enter command (0 = exit, 1 = set, 2 = lookup, 3 = dump):
+2
+Enter the key (decimal number):
+4
+La valeur recherchée : n'est pas trouvée 
+Enter command (0 = exit, 1 = set, 2 = lookup, 3 = dump):
+3
+process : 832281 
+1 : ro
+Enter command (0 = exit, 1 = set, 2 = lookup, 3 = dump):
+0
+bye bye!
+
+exemple 3 dump vide 
+belguitr@im2ag-turing-01:[~/systeme/projet]: ./main 5
+Enter command (0 = exit, 1 = set, 2 = lookup, 3 = dump):
+3
+Enter command (0 = exit, 1 = set, 2 = lookup, 3 = dump):
+3
+Enter command (0 = exit, 1 = set, 2 = lookup, 3 = dump):
+2
+Enter the key (decimal number):
+1
+La valeur recherchée : n'est pas trouvée 
+Enter command (0 = exit, 1 = set, 2 = lookup, 3 = dump):
+0
+bye bye!
